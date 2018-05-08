@@ -2,65 +2,78 @@ import java.util.ArrayList;
 
 public class Calculator {
 
-	private int[] numbers;
+	private String[] numbers;
 	private String expression = "";
 
-	public Calculator(int[] numbers) {
+	public Calculator(String[] numbers) {
 		this.numbers = numbers;
 	}
 
 	public void calculate() {
-		String[] combination = new String[4];
 		String[] operators = {"+", "-", "*", "/"};
-		String[][] combinations = generateCombinations(combination, operators);
-		for (String[] i : combinations) {
+		String[][] combinations = generateCombinations(new String[4], operators);
+		// for (String[] i : combinations) {
+		// 	for (String j : i) {
+		// 		System.out.print(j + "");
+		// 	}
+		// 	System.out.println();
+		// }
+		String[] test = {"1", "2" ,"3", "4", "5"};
+		String[][] perm = permute(test);
+		for (String[] i : perm) {
 			for (String j : i) {
-				System.out.print(j + "");
-			}
-			System.out.println();
-		}
-		int[][] permutations = this.permute(this.numbers);
-		for (int[] i : permutations) {
-			for (int j : i) {
 				System.out.print(j + " ");
-				this.expression += j;
 			}
 			System.out.println();
 		}
+		System.out.println(perm.length);
+		// int[][] permutations = this.permute(this.numbers);
+		// for (int[] i : permutations) {
+		// 	for (int j : i) {
+		// 		System.out.print(j + " ");
+		// 		this.expression += j;
+		// 	}
+		// 	System.out.println();
+		// }
+		// String[][] expression = new String[factorial(8) * (int) Math.pow(4, 4)][];
+
+
+		// for (String[] operatorCombination : combinations) {
+		// 	String[] expressionArray = new String[8];
+		// 	for (int i = 0; i < 4; i++) {
+		// 		expressionArray[i] = operatorCombination[i];
+		// 		expressionArray[i + 4] = numbers[i];
+		// 	}
+		// 	String[][] expressions = permute(expressionArray);
+		// 	System.out.println(expressions[0][5]);
+		// }
 	}
 
-	private int[][] permute(int[] numbers) {
-		int[][] permutations = new int[factorial(numbers.length)][];
+	private String[][] permute(String[] list) {
+		String[][] permutations = new String[factorial(list.length)][];
 		int count = 0;
-		for (int i = 0; i < numbers.length; i++) {
-			int[] permutation = new int[numbers.length - 1];
-			int start = 0;
-			for (int j = 0; j < numbers.length; j++) {
-				if (j == i) {
-					start = numbers[j];
-				} else if (j > i || j == numbers.length - 1) {
-					permutation[j - 1] = numbers[j];
-				} else {
-					permutation[j] = numbers[j];
+		for (int i = 0; i < list.length; i++) {
+			String[] permutation = new String[list.length - 1];
+			String start = list[i];
+			for (int j = 0; j < list.length; j++) {
+				if (j < i) {
+					permutation[j] = list[j];
+				} else if (j > i) {
+					permutation[j - 1] = list[j];
 				}
 			}
-			if (permutation.length >= 2) {
-				int[][] subPermutations = permute(permutation);
+			if (permutation.length == 1) {
+				permutations[count++] = new String[]{start, permutation[0]};
+			} else {
+				String[][] subPermutations = permute(permutation);
 				for (int k = 0; k < subPermutations.length; k++) {
-					int[] fullPermutation = new int[permutation.length + 1];
+					String[] fullPermutation = new String[permutation.length + 1];
 					fullPermutation[0] = start;
 					for (int l = 0; l < permutation.length; l++) {
 						fullPermutation[l + 1] = subPermutations[k][l];
 					}
 					permutations[count++] = fullPermutation;
 				}
-			} else {
-				int[] fullPermutation = new int[permutation.length + 1];
-				fullPermutation[0] = start;
-				for (int j = 0; j < permutation.length; j++) {
-					fullPermutation[j + 1] = permutation[j];
-				}
-				permutations[count++] = fullPermutation;
 			}
 		}
 		return permutations;
@@ -104,13 +117,13 @@ public class Calculator {
 		} else {
 			for (int i = 0; i < args.length; i++) {
 				try {
-					numbers[i] = Integer.parseInt(args[i]);
+					Integer.parseInt(args[i]);
 				} catch (NumberFormatException e) {
 					System.out.println("Not a number");
 				}
 			}
 		}
-		Calculator calculator = new Calculator(numbers);
+		Calculator calculator = new Calculator(args);
 		calculator.calculate();
 	}
 }
