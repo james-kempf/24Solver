@@ -11,7 +11,8 @@ public class Calculator {
 
 	public void calculate() {
 		String[] combination = new String[4];
-		String[][] combinations = generateOperatorCombinations(combination);
+		String[] operators = {"+", "-", "*", "/"};
+		String[][] combinations = generateCombinations(combination, operators);
 		for (String[] i : combinations) {
 			for (String j : i) {
 				System.out.print(j + "");
@@ -73,24 +74,23 @@ public class Calculator {
 		return m;
 	}
 
-	private String[][] generateOperatorCombinations(String[] combination) {
-		String[] operators = {"+", "-", "*", "/"};
-		String[][] combinations = new String[(int) Math.pow(4, combination.length)][combination.length];
+	private String[][] generateCombinations(String[] combination, String[] list) {
+		String[][] combinations = new String[(int) Math.pow(list.length, combination.length)][combination.length];
 		if (combination.length == 1) {
 			for (int o = 0; o < 4; o++) {
-				combinations[o][0] = operators[o];
+				combinations[o][0] = list[o];
 			}
 		} else {
 			String[] newCombination = new String[combination.length - 1];
-			for (int o = 0; o < operators.length; o++) {
-				String [][] comb = generateOperatorCombinations(newCombination);
-				for (int j = 0; j < comb.length; j++) {
-					String[] fullCombination = new String[comb[j].length + 1];
-					fullCombination[0] = operators[o];
-					for (int k = 0; k < comb[j].length; k++) {
-						fullCombination[k + 1] = comb[j][k];
+			for (int o = 0; o < list.length; o++) {
+				String [][] comb = generateCombinations(newCombination, list);
+				for (int i = 0; i < comb.length; i++) {
+					String[] fullCombination = new String[comb[i].length + 1];
+					fullCombination[0] = list[o];
+					for (int j = 0; j < comb[j].length; j++) {
+						fullCombination[j + 1] = comb[i][j];
 					}
-					combinations[comb.length * o + j] = fullCombination;
+					combinations[comb.length * o + i] = fullCombination;
 				}
 			}
 		}
