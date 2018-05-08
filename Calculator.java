@@ -10,18 +10,25 @@ public class Calculator {
 	}
 
 	public void calculate() {
+		String[] combination = new String[4];
+		String[][] combinations = generateoperatorsCombinations(combination);
+		for (String[] i : combinations) {
+			for (String j : i) {
+				System.out.print(j + "");
+			}
+			System.out.println();
+		}
 		int[][] permutations = this.permute(this.numbers);
 		for (int[] i : permutations) {
 			for (int j : i) {
 				System.out.print(j + " ");
 				this.expression += j;
-				
 			}
 			System.out.println();
 		}
 	}
 
-	public int[][] permute(int[] numbers) {
+	private int[][] permute(int[] numbers) {
 		int[][] permutations = new int[factorial(numbers.length)][];
 		int count = 0;
 		for (int i = 0; i < numbers.length; i++) {
@@ -65,6 +72,48 @@ public class Calculator {
 		}
 		return m;
 	}
+
+	private String[][] generateoperatorsCombinations(String[] combination) {
+		String start = combination[0];
+		String[] newCombination = new String[combination.length - 1];
+		for (int i = 0; i < newCombination.length; i++) {
+			newCombination[i] = combination[i + 1];
+		}
+		for (int i = 0; i < newCombination.length; i++) {
+			if (newCombination[i] == null) {
+				newCombination[i] = "+";
+				generateoperatorsCombinations(newCombination);
+				newCombination[i] = "-";
+				generateoperatorsCombinations(newCombination);
+				newCombination[i] = "*";
+				generateoperatorsCombinations(newCombination);
+				newCombination[i] = "/";
+				generateoperatorsCombinations(newCombination);
+				break;
+			}
+		}
+		for (String o : combination) {
+			System.out.print(o);
+		}
+		System.out.println();
+		return null;
+	}
+
+	// private String[][] generateOperatorCombinations(String[][] combinations) {
+	// 	for (int i = 0; i < combinations[0].length; i++) {
+	// 		if (combinations[0][i] == null) {
+	// 			for (int j = 0; j < combinations.length/4; j++) {
+	// 				combinations[j][i] = "+";
+	// 				combinations[64 + j][i] = "-";
+	// 				combinations[(64*2) + j][i] = "*";
+	// 				combinations[(64*3) + j][i] = "/";
+	// 			}
+	// 			combinations = generateOperatorCombinations(combinations);
+	// 			break;
+	// 		}
+	// 	}
+	// 	return combinations;
+	// }
 
 	public static void main(String[] args) {
 		int[] numbers = new int[4];
