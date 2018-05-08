@@ -11,7 +11,7 @@ public class Calculator {
 
 	public void calculate() {
 		String[] combination = new String[4];
-		String[][] combinations = generateoperatorsCombinations(combination);
+		String[][] combinations = generateOperatorCombinations(combination);
 		for (String[] i : combinations) {
 			for (String j : i) {
 				System.out.print(j + "");
@@ -73,47 +73,29 @@ public class Calculator {
 		return m;
 	}
 
-	private String[][] generateoperatorsCombinations(String[] combination) {
-		String start = combination[0];
-		String[] newCombination = new String[combination.length - 1];
-		for (int i = 0; i < newCombination.length; i++) {
-			newCombination[i] = combination[i + 1];
-		}
-		for (int i = 0; i < newCombination.length; i++) {
-			if (newCombination[i] == null) {
-				newCombination[i] = "+";
-				generateoperatorsCombinations(newCombination);
-				newCombination[i] = "-";
-				generateoperatorsCombinations(newCombination);
-				newCombination[i] = "*";
-				generateoperatorsCombinations(newCombination);
-				newCombination[i] = "/";
-				generateoperatorsCombinations(newCombination);
-				break;
+	private String[][] generateOperatorCombinations(String[] combination) {
+		String[] operators = {"+", "-", "*", "/"};
+		String[][] combinations = new String[(int) Math.pow(4, combination.length)][combination.length];
+		if (combination.length == 1) {
+			for (int o = 0; o < 4; o++) {
+				combinations[o][0] = operators[o];
+			}
+		} else {
+			String[] newCombination = new String[combination.length - 1];
+			for (int o = 0; o < operators.length; o++) {
+				String [][] comb = generateOperatorCombinations(newCombination);
+				for (int j = 0; j < comb.length; j++) {
+					String[] fullCombination = new String[comb[j].length + 1];
+					fullCombination[0] = operators[o];
+					for (int k = 0; k < comb[j].length; k++) {
+						fullCombination[k + 1] = comb[j][k];
+					}
+					combinations[comb.length * o + j] = fullCombination;
+				}
 			}
 		}
-		for (String o : combination) {
-			System.out.print(o);
-		}
-		System.out.println();
-		return null;
+		return combinations;
 	}
-
-	// private String[][] generateOperatorCombinations(String[][] combinations) {
-	// 	for (int i = 0; i < combinations[0].length; i++) {
-	// 		if (combinations[0][i] == null) {
-	// 			for (int j = 0; j < combinations.length/4; j++) {
-	// 				combinations[j][i] = "+";
-	// 				combinations[64 + j][i] = "-";
-	// 				combinations[(64*2) + j][i] = "*";
-	// 				combinations[(64*3) + j][i] = "/";
-	// 			}
-	// 			combinations = generateOperatorCombinations(combinations);
-	// 			break;
-	// 		}
-	// 	}
-	// 	return combinations;
-	// }
 
 	public static void main(String[] args) {
 		int[] numbers = new int[4];
