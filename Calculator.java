@@ -1,8 +1,11 @@
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 import java.util.Stack;
 import java.util.HashSet;
+import java.util.EmptyStackException;
 
+/**
+ * Receives a list of 4 numbers and computes all possible expressions that equals 24
+ */
 public class Calculator {
 
 	private String[] numbers;
@@ -11,6 +14,9 @@ public class Calculator {
 		this.numbers = numbers;
 	}
 
+	/**
+	 * Driver method to call all other methods
+	 */
 	public void calculate() {
 		String[] operators = { "+", "-", "*", "/" };
 		String[][] combinations = generateCombinations(new String[3], operators);
@@ -40,6 +46,9 @@ public class Calculator {
 		}
 	}
 
+	/**
+	 * Recursive method to generate a HashSet of all permutations of list
+	 */
 	private HashSet<String[]> permute(String[] list) {
 		HashSet<String[]> permutations = new HashSet<>();
 		for (int i = 0; i < list.length; i++) {
@@ -69,6 +78,10 @@ public class Calculator {
 		return permutations;
 	}
 
+	/**
+	 * Recursive method to generate an array of combinations of list
+	 * of size n, where n is the length of combination
+	 */
 	private String[][] generateCombinations(String[] combination, String[] list) {
 		String[][] combinations = new String[(int) Math.pow(list.length, combination.length)][combination.length];
 		if (combination.length == 1) {
@@ -92,6 +105,10 @@ public class Calculator {
 		return combinations;
 	}
 
+	/**
+	 * Evalutes a prefix expression, represented by an array of Strings,
+	 * and returns whether it equals a given sum
+	 */
 	private boolean compute(String[] expression, double sum) {
 		Stack<Double> stack = new Stack<>();
 		for (String entry : expression) {
@@ -133,13 +150,14 @@ public class Calculator {
 
 	public static void main(String[] args) {
 		if (args.length != 4) {
-			System.out.println("Enter 4 numbers");
+			System.out.println("Please enter 4 numbers");
+			System.exit(0);
 		} else {
-			for (int i = 0; i < args.length; i++) {
+			for (String arg : args) {
 				try {
-					Integer.parseInt(args[i]);
+					Integer.parseInt(arg);
 				} catch (NumberFormatException e) {
-					System.out.println("Not a number");
+					System.out.println(arg + " - Not a number");
 					System.exit(0);
 				}
 			}
