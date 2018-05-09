@@ -27,7 +27,7 @@ public class Calculator {
 			}
 			HashSet<String[]> expressions = permute(expressionArray);
 			for (String[] expression : expressions) {
-				if (compute(expression)) {
+				if (compute(expression, 24.0)) {
 					solutions.add(expression);
 				}
 			}
@@ -92,56 +92,40 @@ public class Calculator {
 		return combinations;
 	}
 
-	public boolean compute(String[] expression) {
+	private boolean compute(String[] expression, double sum) {
 		Stack<Double> stack = new Stack<>();
 		for (String entry : expression) {
-			switch (entry) {
-			case "+":
-				try {
-					double b = stack.pop();
-					double a = stack.pop();
-					stack.push(a + b);
-				} catch (EmptyStackException e) {
-					return false;
-				}
-				break;
-			case "-":
-				try {
-					double b = stack.pop();
-					double a = stack.pop();
-					stack.push(a - b);
-				} catch (EmptyStackException e) {
-					return false;
-				}
-				break;
-			case "*":
-				try {
-					double b = stack.pop();
-					double a = stack.pop();
-					stack.push(a * b);
-				} catch (EmptyStackException e) {
-					return false;
-				}
-				break;
-			case "/":
-				try {
-					double b = stack.pop();
-					double a = stack.pop();
-					stack.push(a / b);
-				} catch (EmptyStackException e) {
-					return false;
-				} catch (ArithmeticException e) {
-					return false;
-				}
-				break;
-			default:
+			if (Character.isDigit(entry.charAt(0))) {
 				stack.push(Double.parseDouble(entry));
-				break;
+			} else {
+				try {
+					double b = stack.pop();
+					double a = stack.pop();
+					switch (entry) {
+					case "+":
+						stack.push(a + b);
+						break;
+					case "-":
+						stack.push(a - b);
+						break;
+					case "*":
+						stack.push(a * b);
+						break;
+					case "/":
+						try {
+							stack.push(a / b);
+						} catch (ArithmeticException e) {
+							return false;
+						}
+						break;
+					}
+				} catch (EmptyStackException e) {
+					return false;
+				}
 			}
 		}
 		try {
-			double sum = stack.pop();
-			return (sum == 24.0);
+			return (stack.pop() == sum);
 		} catch (EmptyStackException e) {
 			return false;
 		}
@@ -156,6 +140,7 @@ public class Calculator {
 					Integer.parseInt(args[i]);
 				} catch (NumberFormatException e) {
 					System.out.println("Not a number");
+					System.exit(0);
 				}
 			}
 		}
