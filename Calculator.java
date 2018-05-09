@@ -1,57 +1,47 @@
 import java.util.ArrayList;
+import java.util.EmptyStackException;
+import java.util.Stack;
+import java.util.HashSet;
 
 public class Calculator {
 
 	private String[] numbers;
-	private String expression = "";
 
 	public Calculator(String[] numbers) {
 		this.numbers = numbers;
 	}
 
 	public void calculate() {
-		String[] operators = {"+", "-", "*", "/"};
-		String[][] combinations = generateCombinations(new String[4], operators);
-		// for (String[] i : combinations) {
-		// 	for (String j : i) {
-		// 		System.out.print(j + "");
-		// 	}
-		// 	System.out.println();
-		// }
-		String[] test = {"1", "2" ,"3", "4", "5"};
-		String[][] perm = permute(test);
-		for (String[] i : perm) {
-			for (String j : i) {
-				System.out.print(j + " ");
+		String[] operators = { "+", "-", "*", "/" };
+		String[][] combinations = generateCombinations(new String[3], operators);
+
+		ArrayList<String[]> solutions = new ArrayList<>();
+
+		for (String[] operatorCombination : combinations) {
+			String[] expressionArray = new String[7];
+			for (int i = 0; i < operatorCombination.length; i++) {
+				expressionArray[i] = operatorCombination[i];
 			}
-			System.out.println();
+			for (int i = 0; i < numbers.length; i++) {
+				expressionArray[i + operatorCombination.length] = numbers[i];
+			}
+			HashSet<String[]> expressions = permute(expressionArray);
+			for (String[] expression : expressions) {
+				if (compute(expression)) {
+					solutions.add(expression);
+				}
+			}
 		}
-		System.out.println(perm.length);
-		// int[][] permutations = this.permute(this.numbers);
-		// for (int[] i : permutations) {
-		// 	for (int j : i) {
-		// 		System.out.print(j + " ");
-		// 		this.expression += j;
-		// 	}
-		// 	System.out.println();
-		// }
-		// String[][] expression = new String[factorial(8) * (int) Math.pow(4, 4)][];
-
-
-		// for (String[] operatorCombination : combinations) {
-		// 	String[] expressionArray = new String[8];
-		// 	for (int i = 0; i < 4; i++) {
-		// 		expressionArray[i] = operatorCombination[i];
-		// 		expressionArray[i + 4] = numbers[i];
-		// 	}
-		// 	String[][] expressions = permute(expressionArray);
-		// 	System.out.println(expressions[0][5]);
-		// }
+		for (String[] solution : solutions) {
+			for (String entry : solution) {
+				System.out.print(entry + " ");
+			}
+			System.out.println("= 24");
+		}
 	}
 
-	private String[][] permute(String[] list) {
-		String[][] permutations = new String[factorial(list.length)][];
-		int count = 0;
+	private HashSet<String[]> permute(String[] list) {
+		HashSet<String[]> permutations = new HashSet<>();
 		for (int i = 0; i < list.length; i++) {
 			String[] permutation = new String[list.length - 1];
 			String start = list[i];
@@ -63,28 +53,20 @@ public class Calculator {
 				}
 			}
 			if (permutation.length == 1) {
-				permutations[count++] = new String[]{start, permutation[0]};
+				permutations.add(new String[] { start, permutation[0] });
 			} else {
-				String[][] subPermutations = permute(permutation);
-				for (int k = 0; k < subPermutations.length; k++) {
-					String[] fullPermutation = new String[permutation.length + 1];
+				HashSet<String[]> subPermutations = permute(permutation);
+				for (String[] subPermutation : subPermutations) {
+					String[] fullPermutation = new String[subPermutation.length + 1];
 					fullPermutation[0] = start;
-					for (int l = 0; l < permutation.length; l++) {
-						fullPermutation[l + 1] = subPermutations[k][l];
+					for (int l = 0; l < subPermutation.length; l++) {
+						fullPermutation[l + 1] = subPermutation[l];
 					}
-					permutations[count++] = fullPermutation;
+					permutations.add(fullPermutation);
 				}
 			}
 		}
 		return permutations;
-	}
-
-	private int factorial(int n) {
-		int m = 1;
-		for (int i = 1; i <= n; i++) {
-			m *= i;
-		}
-		return m;
 	}
 
 	private String[][] generateCombinations(String[] combination, String[] list) {
@@ -96,7 +78,7 @@ public class Calculator {
 		} else {
 			String[] newCombination = new String[combination.length - 1];
 			for (int o = 0; o < list.length; o++) {
-				String [][] comb = generateCombinations(newCombination, list);
+				String[][] comb = generateCombinations(newCombination, list);
 				for (int i = 0; i < comb.length; i++) {
 					String[] fullCombination = new String[comb[i].length + 1];
 					fullCombination[0] = list[o];
@@ -110,8 +92,62 @@ public class Calculator {
 		return combinations;
 	}
 
+	public boolean compute(String[] expression) {
+		Stack<Double> stack = new Stack<>();
+		for (String entry : expression) {
+			switch (entry) {
+			case "+":
+				try {
+					double b = stack.pop();
+					double a = stack.pop();
+					stack.push(a + b);
+				} catch (EmptyStackException e) {
+					return false;
+				}
+				break;
+			case "-":
+				try {
+					double b = stack.pop();
+					double a = stack.pop();
+					stack.push(a - b);
+				} catch (EmptyStackException e) {
+					return false;
+				}
+				break;
+			case "*":
+				try {
+					double b = stack.pop();
+					double a = stack.pop();
+					stack.push(a * b);
+				} catch (EmptyStackException e) {
+					return false;
+				}
+				break;
+			case "/":
+				try {
+					double b = stack.pop();
+					double a = stack.pop();
+					stack.push(a / b);
+				} catch (EmptyStackException e) {
+					return false;
+				} catch (ArithmeticException e) {
+					return false;
+				}
+				break;
+			default:
+				stack.push(Double.parseDouble(entry));
+				break;
+			}
+		}
+		try {
+			double sum = stack.pop();
+			return (sum == 24.0);
+		} catch (EmptyStackException e) {
+			return false;
+		}
+	}
+
 	public static void main(String[] args) {
-		int[] numbers = new int[4];
 		if (args.length != 4) {
 			System.out.println("Enter 4 numbers");
 		} else {
