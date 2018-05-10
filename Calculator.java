@@ -173,27 +173,36 @@ public class Calculator {
 					String last = b;
 					if (previousPriority < currentPriority) {
 						if (reversable) {
-							if (isNumeric(a) && isNumeric(b) && Integer.parseInt(b) > Integer.parseInt(a)) {
-								first = b;
-								last = a;
-							} else if (isNumeric(a)) {
+							if (isNumeric(a)) {
 								first = "(" + b + ")";
 								last = a;
+							} else if (isNumeric(b)) {
+								first = "(" + a + ")";
+							} else {
+								first = "(" + a + ")";
+								last = "(" + b + ")";
+							}
+						} else {
+							if (!isNumeric(a) && isNumeric(b)) {
+								first = "(" + a + ")";
+							} else {
+								first = "(" + a + ")";
+								last = "(" + b + ")";
 							}
 						}
-						if (isNumeric(b)) {
+					} else if (reversable
+							&& (isNumeric(a) && isNumeric(b) && Integer.parseInt(b) > Integer.parseInt(a))
+							|| (isNumeric(a) && !isNumeric(b)) || (b.length() > a.length())) {
+						first = b;
+						last = a;
+					} else if (currentPriority == 1) {
+						if (!isNumeric(a)) {
 							first = "(" + a + ")";
-						} else {
-							first = "(" + a + ")";
+						}
+						if (!isNumeric(b)) {
 							last = "(" + b + ")";
 						}
-					} else if (reversable) {
-						if ((isNumeric(a) && isNumeric(b) && Integer.parseInt(b) > Integer.parseInt(a))
-								|| (isNumeric(a) && !isNumeric(b))) {
-							first = b;
-							last = a;
-						}
-					}
+					} // ((53 + 15) / 2) - 10
 					stack.push(first + " " + entry + " " + last);
 					previousPriority = currentPriority;
 				} catch (EmptyStackException e) {
@@ -201,15 +210,16 @@ public class Calculator {
 				}
 			}
 		}
-		// System.out.println("----------------");
-		// for (
 
-		// String i : postfix) {
-		// 	System.out.print(i + " ");
-		// }
-		// System.out.println();
-		// System.out.println(stack.peek());
-		return stack.pop();
+	String infixExpression = stack.pop();if(infixExpression.equals("2 / (1 / 3) / 4"))
+	{
+		System.out.println("----------------");
+		for (String i : postfix) {
+			System.out.print(i + " ");
+		}
+		System.out.println();
+		System.out.println(infixExpression);
+	}return infixExpression;
 	}
 
 	private boolean isNumeric(String string) {
