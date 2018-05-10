@@ -22,7 +22,7 @@ public class Calculator {
 		String[] operators = { "+", "-", "*", "/" };
 		HashSet<String[]> combinations = generateCombinations(operators, 3);
 
-		HashSet<String[]> solutions = new HashSet<>();
+		ArrayList<String[]> solutions = new ArrayList<>();
 
 		for (String[] operatorCombination : combinations) {
 			String[] expressionArray = new String[7];
@@ -43,11 +43,9 @@ public class Calculator {
 		if (solutions.isEmpty()) {
 			System.out.println("No solutions");
 		} else {
+			System.out.println(solutions.size() + " Solutions found");
 			for (String[] solution : solutions) {
-				for (String entry : solution) {
-					System.out.print(entry + " ");
-				}
-				System.out.println("= 24");
+				System.out.println(postfixToInfix(solution) + " = 24");
 			}
 		}
 	}
@@ -85,8 +83,8 @@ public class Calculator {
 	}
 
 	/**
-	 * Recursive method to generate an array of combinations of list with a
-	 * scpecified size
+	 * Recursive method to generate an array of combinations of list of a specified
+	 * size
 	 */
 	private HashSet<String[]> generateCombinations(String[] list, int choose) {
 		HashSet<String[]> combinations = new HashSet<>();
@@ -111,8 +109,7 @@ public class Calculator {
 	}
 
 	/**
-	 * Evalutes a prefix expression, represented by an array of Strings, and returns
-	 * whether it equals a given sum
+	 * Evalutes a prefix expression and returns whether it equals a given sum
 	 */
 	private boolean compute(String[] expression, double sum) {
 		Stack<Double> stack = new Stack<>();
@@ -153,33 +150,70 @@ public class Calculator {
 		}
 	}
 
-	private void removeDuplicates(HashSet<String[]> expressionSet) {
-		int e1 = 0;
-		HashSet<String[]> remove = new HashSet<>();
-		for (String[] expression1 : expressionSet) {
-			e1++;
-			int e2 = 0;
-			loop: for (String[] expression2 : expressionSet) {
-				e2++;
-				if (e1 < e2) {
-					for (int i = 0; i < expression1.length; i++) {
-						if (!expression1[i].equals(expression2[i])) {
-							break loop;
+	/**
+	 * Converts a postfix expression to an infix String
+	 */
+	private String postfixToInfix(String[] postfix) {
+		Stack<String> stack = new Stack<>();
+		int previousPriority = 1;
+		for (String entry : postfix) {
+			if (Character.isDigit(entry.charAt(0))) {
+				stack.push(entry);
+			} else {
+				try {
+					int currentPriority = (entry.equals("+") || entry.equals("-")) ? 0 : 1;
+					String b = stack.pop();
+					String a = stack.pop();
+					if (previousPriority < currentPriority) {
+						if (a.length() > b.length()) {
+							stack.push("(" + a + ") " + entry + " " + b);
+						} else if (b.length() > a.length()) {
+							stack.push(a + " " + entry + " (" + b + ")");
+						} else {
+							stack.push("(" + a + ") " + entry + " (" + b + ")");
 						}
+					} else {
+						stack.push(a + " " + entry + " " + b);
 					}
-					for (String a : expression1) {
-						System.out.print(a + " ");
-					}
-					System.out.print("= ");
-					for (String a : expression2) {
-						System.out.print(a + " ");
-					}
-					System.out.println();
-					remove.add(expression2);
+					previousPriority = currentPriority;
+				} catch (EmptyStackException e) {
+					System.out.println(e.getMessage());
 				}
 			}
 		}
-		expressionSet.removeAll(remove);
+		return stack.pop();
+	}
+
+	/**
+	 * Remove expressions that are fundementally the same
+	 */
+	private void removeDuplicates(ArrayList<String[]> expressionSet) {
+		int e1 = 0;
+		HashSet<String[]> removeSet = new HashSet<>();
+		for (String[] expression1 : expressionSet) {
+			e1++;
+			int e2 = 0;
+			for (String[] expression2 : expressionSet) {
+				e2++;
+				if (e1 < e2) {
+					ArrayList<Integer> differPlaces = new ArrayList<>();
+					boolean remove = false;
+					for (int i = 0; i < expression1.length; i++) {
+						if (!expression1[i].equals(expression2[i])) {
+							differPlaces.add(i);
+						}
+					}
+					// Expressions are exactly the same
+					if (differPlaces.isEmpty()) {
+						remove = true;
+					}
+					if (remove) {
+						removeSet.add(expression2);
+					}
+				}
+			}
+		}
+		expressionSet.removeAll(removeSet);
 	}
 
 	public static void main(String[] args) {
