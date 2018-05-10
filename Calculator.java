@@ -4,7 +4,8 @@ import java.util.HashSet;
 import java.util.EmptyStackException;
 
 /**
- * Receives a list of 4 numbers and computes all possible expressions that equals 24
+ * Receives a list of 4 numbers and computes all possible expressions that
+ * equals 24
  */
 public class Calculator {
 
@@ -19,9 +20,9 @@ public class Calculator {
 	 */
 	public void calculate() {
 		String[] operators = { "+", "-", "*", "/" };
-		String[][] combinations = generateCombinations(new String[3], operators);
+		HashSet<String[]> combinations = generateCombinations(operators, 3);
 
-		ArrayList<String[]> solutions = new ArrayList<>();
+		HashSet<String[]> solutions = new HashSet<>();
 
 		for (String[] operatorCombination : combinations) {
 			String[] expressionArray = new String[7];
@@ -38,11 +39,16 @@ public class Calculator {
 				}
 			}
 		}
-		for (String[] solution : solutions) {
-			for (String entry : solution) {
-				System.out.print(entry + " ");
+		removeDuplicates(solutions);
+		if (solutions.isEmpty()) {
+			System.out.println("No solutions");
+		} else {
+			for (String[] solution : solutions) {
+				for (String entry : solution) {
+					System.out.print(entry + " ");
+				}
+				System.out.println("= 24");
 			}
-			System.out.println("= 24");
 		}
 	}
 
@@ -79,26 +85,25 @@ public class Calculator {
 	}
 
 	/**
-	 * Recursive method to generate an array of combinations of list
-	 * of size n, where n is the length of combination
+	 * Recursive method to generate an array of combinations of list with a
+	 * scpecified size
 	 */
-	private String[][] generateCombinations(String[] combination, String[] list) {
-		String[][] combinations = new String[(int) Math.pow(list.length, combination.length)][combination.length];
-		if (combination.length == 1) {
-			for (int o = 0; o < 4; o++) {
-				combinations[o][0] = list[o];
+	private HashSet<String[]> generateCombinations(String[] list, int choose) {
+		HashSet<String[]> combinations = new HashSet<>();
+		if (choose == 1) {
+			for (String choice : list) {
+				combinations.add(new String[] { choice });
 			}
 		} else {
-			String[] newCombination = new String[combination.length - 1];
-			for (int o = 0; o < list.length; o++) {
-				String[][] comb = generateCombinations(newCombination, list);
-				for (int i = 0; i < comb.length; i++) {
-					String[] fullCombination = new String[comb[i].length + 1];
-					fullCombination[0] = list[o];
-					for (int j = 0; j < comb[j].length; j++) {
-						fullCombination[j + 1] = comb[i][j];
+			HashSet<String[]> subCombinationSet = generateCombinations(list, choose - 1);
+			for (String choice : list) {
+				for (String[] subCombination : subCombinationSet) {
+					String[] fullCombination = new String[subCombination.length + 1];
+					fullCombination[0] = choice;
+					for (int i = 0; i < subCombination.length; i++) {
+						fullCombination[i + 1] = subCombination[i];
 					}
-					combinations[comb.length * o + i] = fullCombination;
+					combinations.add(fullCombination);
 				}
 			}
 		}
@@ -106,8 +111,8 @@ public class Calculator {
 	}
 
 	/**
-	 * Evalutes a prefix expression, represented by an array of Strings,
-	 * and returns whether it equals a given sum
+	 * Evalutes a prefix expression, represented by an array of Strings, and returns
+	 * whether it equals a given sum
 	 */
 	private boolean compute(String[] expression, double sum) {
 		Stack<Double> stack = new Stack<>();
@@ -146,6 +151,35 @@ public class Calculator {
 		} catch (EmptyStackException e) {
 			return false;
 		}
+	}
+
+	private void removeDuplicates(HashSet<String[]> expressionSet) {
+		int e1 = 0;
+		HashSet<String[]> remove = new HashSet<>();
+		for (String[] expression1 : expressionSet) {
+			e1++;
+			int e2 = 0;
+			loop: for (String[] expression2 : expressionSet) {
+				e2++;
+				if (e1 < e2) {
+					for (int i = 0; i < expression1.length; i++) {
+						if (!expression1[i].equals(expression2[i])) {
+							break loop;
+						}
+					}
+					for (String a : expression1) {
+						System.out.print(a + " ");
+					}
+					System.out.print("= ");
+					for (String a : expression2) {
+						System.out.print(a + " ");
+					}
+					System.out.println();
+					remove.add(expression2);
+				}
+			}
+		}
+		expressionSet.removeAll(remove);
 	}
 
 	public static void main(String[] args) {
