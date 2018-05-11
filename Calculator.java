@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Stack;
 import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.EmptyStackException;
 
 /**
@@ -22,7 +23,7 @@ public class Calculator {
 		String[] operators = { "+", "-", "*", "/" };
 		HashSet<String[]> combinations = generateCombinations(operators, 3);
 
-		HashSet<String> solutions = new HashSet<>();
+		TreeSet<String> solutions = new TreeSet<>();
 
 		for (String[] operatorCombination : combinations) {
 			String[] expressionArray = new String[7];
@@ -153,73 +154,97 @@ public class Calculator {
 	/**
 	 * Converts a postfix expression to an infix String
 	 */
-	private String postfixToInfix(String[] postfix) {
-		int count = 0;
+	public String postfixToInfix(String[] postfix) {
 		Stack<String> stack = new Stack<>();
-		int previousPriority = 1;
+		Stack<Integer> leftPriorities = new Stack<>();
+		Stack<Integer> rightPriorities = new Stack<>();
+		leftPriorities.push(1);
+		leftPriorities.push(1);
+		rightPriorities.push(1);
+		rightPriorities.push(1);
 		for (String entry : postfix) {
-			if (entry.equals("/")) {
-				count++;
-			}
 			if (Character.isDigit(entry.charAt(0))) {
 				stack.push(entry);
+				leftPriorities.push(1);
+				rightPriorities.push(1);
 			} else {
 				try {
 					int currentPriority = (entry.equals("+") || entry.equals("-")) ? 0 : 1;
-					boolean reversable = entry.equals("+") || entry.equals("*");
+					boolean reversable = (entry.equals("+") || entry.equals("*"));
+
+					int bLeftPriority = leftPriorities.pop();
+					int bRightPriority = rightPriorities.pop();
+
+					int aLeftPriority = leftPriorities.pop();
+					int aRightPriority = rightPriorities.pop();
+
 					String b = stack.pop();
 					String a = stack.pop();
-					String first = a;
-					String last = b;
-					if (previousPriority < currentPriority) {
-						if (reversable) {
-							if (isNumeric(a)) {
-								first = "(" + b + ")";
-								last = a;
-							} else if (isNumeric(b)) {
-								first = "(" + a + ")";
-							} else {
-								first = "(" + a + ")";
-								last = "(" + b + ")";
-							}
-						} else {
-							if (!isNumeric(a) && isNumeric(b)) {
-								first = "(" + a + ")";
-							} else {
-								first = "(" + a + ")";
-								last = "(" + b + ")";
-							}
-						}
-					} else if (reversable
-							&& (isNumeric(a) && isNumeric(b) && Integer.parseInt(b) > Integer.parseInt(a))
-							|| (isNumeric(a) && !isNumeric(b)) || (b.length() > a.length())) {
-						first = b;
-						last = a;
-					} else if (currentPriority == 1) {
-						if (!isNumeric(a)) {
-							first = "(" + a + ")";
+
+					boolean reverse = false;
+					boolean parA = false;
+					boolean parB = false;
+					if (!reversable) {
+						if (aRightPriority < currentPriority) {
+							parA = true;
 						}
 						if (!isNumeric(b)) {
-							last = "(" + b + ")";
+							parB = true;
 						}
-					} // ((53 + 15) / 2) - 10
-					stack.push(first + " " + entry + " " + last);
-					previousPriority = currentPriority;
+					} else {
+						if (isNumeric(a) && isNumeric(b)) {
+							if (Integer.parseInt(b) > Integer.parseInt(a)) {
+								reverse = true;
+							}
+						} else if (b.length() > a.length()) {
+							reverse = true;
+						}
+						if (currentPriority == 1) {
+							if (reverse) {
+								if (bRightPriority < currentPriority) {
+									parB = true;
+								}
+								if (!isNumeric(a)) {
+									parA = true;
+								}
+							} else {
+								if (aRightPriority < currentPriority) {
+									parA = true;
+								}
+								if (!isNumeric(b)) {
+									parB = true;
+								}
+							}
+						}
+					}
+					if (parA) {
+						a = "(" + a + ")";
+					}
+					if (parB) {
+						b = "(" + b + ")";
+					}
+					rightPriorities.push(currentPriority);
+					leftPriorities.push(currentPriority);
+					if (reverse) {
+						stack.push(b + " " + entry + " " + a);
+					} else {
+						stack.push(a + " " + entry + " " + b);
+					}
 				} catch (EmptyStackException e) {
 					System.out.println(e.getMessage());
 				}
 			}
 		}
-
-	String infixExpression = stack.pop();if(infixExpression.equals("2 / (1 / 3) / 4"))
-	{
-		System.out.println("----------------");
-		for (String i : postfix) {
-			System.out.print(i + " ");
+		String infixExpression = stack.pop();
+		if (infixExpression.equals("2 / 1 * (4 * 3)")) {
+			System.out.println("----------------");
+			for (String i : postfix) {
+				System.out.print(i + " ");
+			}
+			System.out.println();
+			System.out.println(infixExpression);
 		}
-		System.out.println();
-		System.out.println(infixExpression);
-	}return infixExpression;
+		return infixExpression;
 	}
 
 	private boolean isNumeric(String string) {
