@@ -10,21 +10,27 @@ import java.util.EmptyStackException;
  */
 public class Calculator {
 
-	private String[] numbers;
+	private static final Calculator calculator = new Calculator();
 
-	public Calculator(String[] numbers) {
-		this.numbers = numbers;
+	private Calculator() {
 	}
 
+	public static Calculator getInstance() {
+		return calculator;
+	}
+
+	private final String plus = "+";
+	private final String minus = "-";
+	private final String mult = "*";
+	private final String div = "/";
+	private final String[] operators = { plus, minus, mult, div };
+
 	/**
-	 * Driver method to call all other methods
+	 * Computes all solutions for an array of numbers
 	 */
-	public void calculate() {
-		String[] operators = { "+", "-", "*", "/" };
-		HashSet<String[]> combinations = generateCombinations(operators, 3);
-
+	public TreeSet<String> calculate(String[] numbers) {
 		TreeSet<String> solutions = new TreeSet<>();
-
+		HashSet<String[]> combinations = generateCombinations(operators, 3);
 		for (String[] operatorCombination : combinations) {
 			String[] expressionArray = new String[7];
 			for (int i = 0; i < operatorCombination.length; i++) {
@@ -40,15 +46,7 @@ public class Calculator {
 				}
 			}
 		}
-		// removeDuplicates(solutions);
-		if (solutions.isEmpty()) {
-			System.out.println("No solutions");
-		} else {
-			System.out.println(solutions.size() + " Solutions found");
-			for (String solution : solutions) {
-				System.out.println(solution + " = 24");
-			}
-		}
+		return solutions;
 	}
 
 	/**
@@ -154,7 +152,7 @@ public class Calculator {
 	/**
 	 * Converts a postfix expression to an infix String
 	 */
-	public String postfixToInfix(String[] postfix) {
+	private String postfixToInfix(String[] postfix) {
 		Stack<String> stack = new Stack<>();
 		Stack<String> operators = new Stack<>();
 		for (String entry : postfix) {
@@ -219,14 +217,6 @@ public class Calculator {
 			}
 		}
 		String infixExpression = stack.pop();
-		if (infixExpression.equals("(2 + 1 + 3) * (4)")) {
-			for (String i : postfix) {
-				System.out.print(i + " ");
-			}
-			System.out.println();
-			System.out.println(infixExpression);
-			System.out.println("----------------");
-		}
 		return infixExpression;
 	}
 
@@ -240,11 +230,11 @@ public class Calculator {
 	}
 
 	private boolean isPriority(String operator) {
-		return (operator.equals("*") || operator.equals("/"));
+		return (operator.equals(mult) || operator.equals(div));
 	}
 
 	private boolean isReversable(String operator) {
-		return (operator.equals("+") || operator.equals("*"));
+		return (operator.equals(plus) || operator.equals(mult));
 	}
 
 	public static void main(String[] args) {
@@ -261,7 +251,14 @@ public class Calculator {
 				}
 			}
 		}
-		Calculator calculator = new Calculator(args);
-		calculator.calculate();
+		TreeSet<String> solutions = Calculator.getInstance().calculate(args);
+		if (solutions.isEmpty()) {
+			System.out.println("No solutions");
+		} else {
+			System.out.println(solutions.size() + " Solutions found");
+			for (String solution : solutions) {
+				System.out.println(solution + " = 24");
+			}
+		}
 	}
 }
